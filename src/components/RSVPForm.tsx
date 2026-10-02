@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import confetti from 'canvas-confetti';
 import { Send, CheckCircle2, AlertCircle, Plus, Minus, Calendar, Sparkles, FileSpreadsheet } from 'lucide-react';
 import { getAccessToken, appendRsvpToSheet } from '../utils/googleSheets';
+import { apiClient } from '../utils/apiClient';
 
 interface RsvpResponseData {
   id: string;
@@ -81,28 +82,22 @@ export const RSVPForm: React.FC = () => {
     setLoading(true);
 
     try {
-      const res = await fetch('/api/rsvp', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: name.trim(),
-          phone: phone.trim(),
-          status,
-          additionalGuestsCount,
-          additionalGuestNames: additionalGuestNames.map((g) => g.trim()).filter(Boolean),
-          notes: notes.trim(),
-        }),
+      const data = await apiClient.submitRsvp({
+        name: name.trim(),
+        phone: phone.trim(),
+        status,
+        additionalGuestsCount,
+        additionalGuestNames: additionalGuestNames.map((g) => g.trim()).filter(Boolean),
+        notes: notes.trim(),
       });
 
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Failed to submit RSVP. Please try again.');
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to submit RSVP. Please try again.');
       }
 
       // If Google Sheet is connected and token is active, append directly in real-time
       try {
-        const sheetRes = await fetch('/api/connected-sheet');
-        const sheetJson = await sheetRes.json();
+        const sheetJson = await apiClient.getConnectedSheet();
         if (sheetJson.connectedSheet?.spreadsheetId) {
           const token = await getAccessToken();
           if (token) {

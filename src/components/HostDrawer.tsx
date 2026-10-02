@@ -21,6 +21,7 @@ import {
   createPartySpreadsheet,
   syncAllRsvpsToSheet,
 } from '../utils/googleSheets';
+import { apiClient } from '../utils/apiClient';
 import { User } from 'firebase/auth';
 
 interface RsvpItem {
@@ -99,8 +100,7 @@ export const HostDrawer: React.FC<HostDrawerProps> = ({ isOpen, onClose }) => {
   const fetchRsvps = async (currentPin: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/rsvps?pin=${encodeURIComponent(currentPin)}`);
-      const data = await res.json();
+      const data = await apiClient.getRsvps(currentPin);
       if (data.success) {
         setStats(data.stats);
         setRsvps(data.rsvps);
@@ -118,13 +118,7 @@ export const HostDrawer: React.FC<HostDrawerProps> = ({ isOpen, onClose }) => {
 
   const fetchSheetsStatus = async () => {
     try {
-      const [configRes, sheetRes] = await Promise.all([
-        fetch('/api/google-sheets-config'),
-        fetch('/api/connected-sheet'),
-      ]);
-      const configData = await configRes.json();
-      const sheetData = await sheetRes.json();
-      setSheetsConfig(configData);
+      const sheetData = await apiClient.getConnectedSheet();
       if (sheetData.connectedSheet) {
         setConnectedSheet(sheetData.connectedSheet);
       }
@@ -184,26 +178,22 @@ export const HostDrawer: React.FC<HostDrawerProps> = ({ isOpen, onClose }) => {
       // Create spreadsheet via Google Sheets API
       const newSheet = await createPartySpreadsheet(token);
 
-      // Save connection on backend
-      const res = await fetch('/api/connected-sheet', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          spreadsheetId: newSheet.spreadsheetId,
-          spreadsheetUrl: newSheet.spreadsheetUrl,
-          accountEmail: googleUser?.email || '',
-        }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        setConnectedSheet(data.connectedSheet);
-        // Automatically sync initial RSVPs
-        if (rsvps.length > 0) {
-          await syncAllRsvpsToSheet(newSheet.spreadsheetId, rsvps, token);
-          setSyncSuccessMsg(`Connected! Synced ${rsvps.length} current RSVPs to your new Google Sheet.`);
-        } else {
-          setSyncSuccessMsg('Connected! Your party spreadsheet is ready in Google Drive.');
-        }
+      // Save connection
+      const sheetPayload = {
+        spreadsheetId: newSheet.spreadsheetId,
+        spreadsheetUrl: newSheet.spreadsheetUrl,
+        accountEmail: googleUser?.email || '',
+        connectedAt: new Date().toISOString(),
+      };
+      await apiClient.saveConnectedSheet(sheetPayload);
+      setConnectedSheet(sheetPayload);
+
+      // Automatically sync initial RSVPs
+      if (rsvps.length > 0) {
+        await syncAllRsvpsToSheet(newSheet.spreadsheetId, rsvps, token);
+        setSyncSuccessMsg(`Connected! Synced ${rsvps.length} current RSVPs to your new Google Sheet.`);
+      } else {
+        setSyncSuccessMsg('Connected! Your party spreadsheet is ready in Google Drive.');
       }
     } catch (err: any) {
       setGoogleError(err.message || 'Failed to create Google Sheet.');
@@ -247,11 +237,7 @@ export const HostDrawer: React.FC<HostDrawerProps> = ({ isOpen, onClose }) => {
 
   const executeDisconnect = async () => {
     try {
-      await fetch('/api/connected-sheet', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ disconnect: true }),
-      });
+      await apiClient.disconnectSheet();
       setConnectedSheet(null);
       setSyncSuccessMsg('Google Sheet disconnected.');
     } catch (err: any) {
