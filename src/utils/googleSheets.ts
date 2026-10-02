@@ -11,17 +11,29 @@ import firebaseConfig from '../config/firebase.ts';
 import type { RsvpEntry } from '../types/party';
 
 // Initialize Firebase App safely
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+let app: any = null;
+let auth: any = null;
+try {
+  app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+  auth = getAuth(app);
+} catch (err) {
+  console.warn('Firebase init warning:', err);
+}
+export { auth };
 
 export const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
 
-const provider = new GoogleAuthProvider();
-provider.addScope('https://www.googleapis.com/auth/spreadsheets');
-provider.setCustomParameters({
-  prompt: 'consent',
-  access_type: 'offline',
-});
+let provider: GoogleAuthProvider | null = null;
+try {
+  provider = new GoogleAuthProvider();
+  provider.addScope('https://www.googleapis.com/auth/spreadsheets');
+  provider.setCustomParameters({
+    prompt: 'consent',
+    access_type: 'offline',
+  });
+} catch (err) {
+  console.warn('GoogleAuthProvider init warning:', err);
+}
 
 let isSigningIn = false;
 let cachedAccessToken: string | null = null;
@@ -31,22 +43,35 @@ export const initAuth = (
   onAuthSuccess?: (user: User, token: string) => void,
   onAuthFailure?: () => void
 ) => {
-  return onAuthStateChanged(auth, async (user: User | null) => {
-    if (user) {
-      if (cachedAccessToken) {
-        if (onAuthSuccess) onAuthSuccess(user, cachedAccessToken);
-      } else if (!isSigningIn) {
+  if (!auth) {
+    if (onAuthFailure) onAuthFailure();
+    return () => {};
+  }
+  try {
+    return onAuthStateChanged(auth, async (user: User | null) => {
+      if (user) {
+        if (cachedAccessToken) {
+          if (onAuthSuccess) onAuthSuccess(user, cachedAccessToken);
+        } else if (!isSigningIn) {
+          if (onAuthFailure) onAuthFailure();
+        }
+      } else {
+        cachedAccessToken = null;
         if (onAuthFailure) onAuthFailure();
       }
-    } else {
-      cachedAccessToken = null;
-      if (onAuthFailure) onAuthFailure();
-    }
-  });
+    });
+  } catch (err) {
+    console.warn('Auth listener error:', err);
+    if (onAuthFailure) onAuthFailure();
+    return () => {};
+  }
 };
 
 // Sign in with Google Popup
 export const googleSignIn = async (): Promise<{ user: User; accessToken: string } | null> => {
+  if (!auth || !provider) {
+    throw new Error('Google Sign-in is not initialized in this environment.');
+  }
   try {
     isSigningIn = true;
     const result = await signInWithPopup(auth, provider);
@@ -73,7 +98,13 @@ export const setCachedAccessToken = (token: string | null) => {
 };
 
 export const logout = async () => {
-  await signOut(auth);
+  if (auth) {
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.warn('Sign out warning:', err);
+    }
+  }
   cachedAccessToken = null;
 };
 
