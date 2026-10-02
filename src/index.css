@@ -1,0 +1,67 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: 'Syne', sans-serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #07070c;
+  color: #f3f4f6;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Glassmorphism helpers - optimized for smooth 60fps */
+.glass-panel {
+  background: rgba(16, 16, 26, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-panel-glow {
+  background: rgba(20, 18, 34, 0.9);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  box-shadow: 0 0 25px -5px rgba(168, 85, 247, 0.15);
+}
+
+.glass-input {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.glass-input:focus {
+  border-color: #ec4899;
+  box-shadow: 0 0 0 2px rgba(236, 72, 153, 0.25);
+  outline: none;
+}
+
+/* Subtle glow effects */
+.neon-glow-pink {
+  text-shadow: 0 0 20px rgba(236, 72, 153, 0.5);
+}
+
+.neon-glow-purple {
+  text-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
+}
+
+.neon-glow-cyan {
+  text-shadow: 0 0 20px rgba(6, 182, 212, 0.5);
+}
+
+/* Static ambient aura (no expensive animating blur filters) */
+.ambient-glow {
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.15) 0%, rgba(236, 72, 153, 0.08) 50%, transparent 70%);
+}
+
+/* Noise overlay */
+.bg-noise {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}

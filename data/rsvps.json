@@ -1,0 +1,53 @@
+[
+  {
+    "id": "rsvp-1790957119436-6r0nw",
+    "timestamp": "2026-10-02T16:05:19.435Z",
+    "name": "Maya Lin",
+    "phone": "214-555-3344",
+    "status": "YES",
+    "additionalGuestsCount": 1,
+    "additionalGuestNames": [
+      "Dev"
+    ],
+    "notes": "Bringing ice and vodka!",
+    "submittedAtFormatted": "Oct 2, 2026, 11:05 AM CDT"
+  },
+  {
+    "id": "rsvp-1790955944572-6xvg8",
+    "timestamp": "2026-10-02T15:45:44.572Z",
+    "name": "Jordan Lee",
+    "phone": "214-555-9876",
+    "status": "YES",
+    "additionalGuestsCount": 2,
+    "additionalGuestNames": [
+      "Sam",
+      "Taylor"
+    ],
+    "notes": "Bringing a case of craft seltzers!",
+    "submittedAtFormatted": "Oct 2, 2026, 10:45 AM CDT"
+  },
+  {
+    "id": "seed-1",
+    "timestamp": "2026-10-02T10:45:36.434Z",
+    "name": "Nirav Patel (Host)",
+    "phone": "469-555-0199",
+    "status": "YES",
+    "additionalGuestsCount": 0,
+    "additionalGuestNames": [],
+    "notes": "Let the madness begin! 🍻",
+    "submittedAtFormatted": "Oct 2, 2026, 3:30 PM CDT"
+  },
+  {
+    "id": "seed-2",
+    "timestamp": "2026-10-02T13:45:36.434Z",
+    "name": "Rohan Sharma",
+    "phone": "214-555-4821",
+    "status": "YES",
+    "additionalGuestsCount": 1,
+    "additionalGuestNames": [
+      "Priya V."
+    ],
+    "notes": "Bringing tequila and good playlist recommendations.",
+    "submittedAtFormatted": "Oct 2, 2026, 6:30 PM CDT"
+  }
+]

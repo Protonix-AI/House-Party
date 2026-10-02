@@ -1,0 +1,6 @@
+{
+  "name": "House Party 2026 — Nirav Patel",
+  "description": "Official invitation website for House Party 2026 hosted by Nirav Patel in Dallas, TX. RSVP, event details, live countdown, and directions.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
